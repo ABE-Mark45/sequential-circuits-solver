@@ -9,6 +9,12 @@ n_inputs = int(input('Enter the number of inputs: '))
 present_states = np.zeros((2**n_states, n_states), dtype=np.uint8)
 next_states = np.zeros((2**n_inputs, 2**n_states, n_states), dtype=np.uint8)
 
+state_names = []
+print("Enter states names (starting from MSB): ")
+for i in range(n_states):
+    state_names.append(input("Bit: " + str(n_states - i)))
+
+input_name = 'X' if n_inputs == 1 else 'XY'
 #print("Enter the present states: ")
 
 for i in range(2**n_states):
@@ -19,7 +25,7 @@ for i in range(2**n_states):
 print("Enter the next states: ")
 
 for current_input in range(2**n_inputs):
-    print("Enter the next state when input=" + format(current_input, '02b'))
+    print("Enter the next state when " + input_name + "=" + format(current_input, '0'+str(n_inputs)+'b'))
     for i in range(2**n_states):
         print(str(i) + ": ", end='')
         s = input()
@@ -88,13 +94,13 @@ sheet.write(0, 1, "Present State")
 sheet.write(0, n_states+1, "Next State")
 
 
-state_names = ['Q3', 'Q2', 'Q1']
+#state_names = ['Q3', 'Q2', 'Q1']
 FF_names = ["", 'T', 'D', 'JK', 'SR']
 for i in range(n_states):
     sheet.write(2, i, state_names[i])
 
 for current_input in range(2**n_inputs):
-    sheet.write(1, (current_input+1)*n_states, "X=" + format(current_input, '02b'))
+    sheet.write(1, (current_input+1)*n_states, input_name+"=" + format(current_input, '02b'))
     for cur_state in range(n_states):
         sheet.write(2, (current_input+1)*n_states+cur_state, state_names[cur_state] + "+")
 
@@ -114,7 +120,7 @@ for current_ff in range(len(FF_Excitations)):
     if FF_types[current_ff] <= 2:
         sheet.write(1, last_column, FF_names[FF_types[current_ff]])
         for current_input in range(2**n_inputs):
-            sheet.write(2, last_column, "X="+format(current_input, '02b'))
+            sheet.write(2, last_column, input_name+"="+format(current_input, '0'+str(n_inputs)+'b'))
             for row in range(3, 3+2**n_states):
                 sheet.write(row, last_column, FF_Excitations[current_ff, current_input, row-3])
             last_column += 1
@@ -122,12 +128,12 @@ for current_ff in range(len(FF_Excitations)):
         for current_input in range(2 ** n_inputs):
             sheet.write(2, last_column, FF_names[FF_types[current_ff]][0])
             sheet.write(2, last_column + 1, FF_names[FF_types[current_ff]][1])
-            sheet.write(1, last_column, "X=" + format(current_input, '02b'))
+            sheet.write(1, last_column, input_name+"=" + format(current_input, '0'+str(n_inputs)+'b'))
             for channel in range(2):
                 for row in range(3, 3 + 2 ** n_states):
                     num = FF_Excitations[current_ff, current_input, row - 3][channel]
                     if num == 2:
-                        sheet.write(row, last_column, "X")
+                        sheet.write(row, last_column, input_name)
                     else:
                         sheet.write(row, last_column, num)
                 last_column += 1
