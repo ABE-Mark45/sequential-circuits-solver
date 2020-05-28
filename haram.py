@@ -9,11 +9,11 @@ n_inputs = int(input('Enter the number of inputs: '))
 present_states = np.zeros((2**n_states, n_states), dtype=np.uint8)
 next_states = np.zeros((2**n_inputs, 2**n_states, n_states), dtype=np.uint8)
 
-print("Enter the present states: ")
+#print("Enter the present states: ")
 
 for i in range(2**n_states):
     print(str(i) + ": ", end='')
-    s = input()
+    s = format(i, '0'+str(n_states)+'b')
     present_states[i] = np.array([int(s[x]) for x in range(n_states)])
 
 print("Enter the next states: ")
