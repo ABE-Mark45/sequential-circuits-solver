@@ -6,9 +6,10 @@ state_name = {}
 
 n_states = int(input('Enter the number of states: '))
 n_inputs = int(input('Enter the number of inputs: '))
+n_outputs = int(input('Enter the number of outputs: '))
 
-next_states = np.zeros((n_states, n_inputs), dtype=np.uint8)
-outputs = np.zeros((n_states, n_inputs), dtype=np.uint8)
+next_states = np.zeros((n_states, n_inputs))
+outputs = np.zeros((n_states, n_inputs, n_outputs))
 
 
 def name_array(row):
@@ -37,35 +38,55 @@ def main():
         state_index[inp] = index
         state_name[index] = inp
 
+    state_index['-'] = -1
+    state_name[-1] = '-'
+
     print("Fill state table")
     for state in range(n_states):
         for inp in range(n_inputs):
-            print(str(state_name[state]) + " goes to what? when input is " + str(inp))
+            print(str(state_name[state]) + " goes to what? when input is " + str(inp) + "    enter '-' for unspecified")
+
             next_states[state, inp] = state_index[input()]
     print(np.array(list(map(name_array, next_states))))
 
+    print("enter '-' for unspecified")
     print("Fill output table")
     for state in range(n_states):
         for inp in range(n_inputs):
-            print(str(state_name[state]) + " outputs what? when input is " + str(inp))
-            outputs[state, inp] = int(input())
+            for out in range(n_outputs):
+
+                print(str(state_name[state]) + ", input: " + str(inp) + ", output :" + str(out))
+                s = input()
+                if s == '-':
+                    outputs[state, inp, out] = -1
+                else:
+                    outputs[state, inp, out] = int(s)
     print(outputs)
 
-    """next_states = np.array
-     [[0,1],
-     [2,3],
-     [0,1],
-     [2,3]]
-    
-    outputs = np.array([[1 1]
-     [1 1]
-     [0 0]
-     [1 1]
-     [0 0]
-        [0 0]
-    [1 1]
-    [0 0]
-    [1 1]]"""
+    # edit cells
+    print("Edit cells, enter e to end edit")
+    while True:
+        print("Enter 0 for next state table, 1 for outputs table")
+        s = input()
+        if s == 'e':
+            break
+
+        row = input("present state:")
+        inp = int(input("input number:"))
+
+        if int(s) == 0:
+            new_state = input("new next state :")
+            next_states[state_index[row], inp] = state_index[new_state]
+            print(np.array(list(map(name_array, next_states))))
+        else:
+            out = int(input("output number: "))
+            new_out = input("new output value:")
+            if new_out == '-':
+                new_out = -1
+            else:
+                new_out = int(new_out)
+            outputs[state_index[row], inp, out] = new_out
+            print(outputs)
 
     # implication table
     table = np.empty((n_states, n_states), dtype=object)
@@ -80,11 +101,15 @@ def main():
         for j in range(i):
             # compare state i's and j's outputs
             for k in range(n_inputs):
-                if outputs[i, k] != outputs[j, k]:
-                    # different outputs detected , mark it None
-                    table[i, j] = None
-                    table[j, i] = None
-                    break
+                for l in range(n_outputs):
+                    if outputs[i, k, l] == -1 or outputs[j, k, l] == -1:
+                        continue
+
+                    if outputs[i, k, l] != outputs[j, k, l]:
+                        # different outputs detected , mark it None
+                        table[i, j] = None
+                        table[j, i] = None
+                        break
 
     # "marking requirements" iteration
     for i in range(1, n_states):
@@ -94,6 +119,9 @@ def main():
 
             # compare state i's and j's next states
             for k in range(n_inputs):
+                if next_states[i, k] == -1 or next_states[j, k] == -1:
+                    continue
+
                 if next_states[i, k] != next_states[j, k]:
                     # different next state detected, add to its list in the table
                     table[i, j].append((next_states[i, k], next_states[j, k]))
