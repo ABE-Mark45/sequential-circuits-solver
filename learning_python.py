@@ -7,9 +7,12 @@ state_name = {}
 n_states = int(input('Enter the number of states: '))
 n_inputs = int(input('Enter the number of inputs: '))
 n_outputs = int(input('Enter the number of outputs: '))
+moore = int(input("Enter 1 for moore : "))
 
 next_states = np.zeros((n_states, n_inputs))
 outputs = np.zeros((n_states, n_inputs, n_outputs))
+if moore == 1:
+    outputs = np.zeros(n_states)
 
 
 def name_array(row):
@@ -51,16 +54,25 @@ def main():
 
     print("enter '-' for unspecified")
     print("Fill output table")
-    for state in range(n_states):
-        for inp in range(n_inputs):
-            for out in range(n_outputs):
+    if moore == 1:
+        for state in range(n_states):
+            print("out put of " + str(state_name[state]) + " :")
+            s = input()
+            if s == '-':
+                outputs[state] = -1
+            else:
+                outputs[state] = int(s)
+    else:
+        for state in range(n_states):
+            for inp in range(n_inputs):
+                for out in range(n_outputs):
 
-                print(str(state_name[state]) + ", input: " + str(inp) + ", output :" + str(out))
-                s = input()
-                if s == '-':
-                    outputs[state, inp, out] = -1
-                else:
-                    outputs[state, inp, out] = int(s)
+                    print(str(state_name[state]) + ", input: " + str(inp) + ", output :" + str(out))
+                    s = input()
+                    if s == '-':
+                        outputs[state, inp, out] = -1
+                    else:
+                        outputs[state, inp, out] = int(s)
     print(outputs)
 
     # edit cells
@@ -97,8 +109,20 @@ def main():
             table[i, j] = []
 
     # "mark different outputs" iteration
+
     for i in range(1, n_states):
         for j in range(i):
+            if moore == 1:
+                if outputs[i] == -1 or outputs[j] == -1:
+                    continue
+
+                if outputs[i] != outputs[j]:
+                    # different outputs detected , mark it None
+                    table[i, j] = None
+                    table[j, i] = None
+                    break
+                continue
+
             # compare state i's and j's outputs
             for k in range(n_inputs):
                 for l in range(n_outputs):
